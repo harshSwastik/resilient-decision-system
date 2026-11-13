@@ -1,0 +1,8 @@
+{
+  "applicant_id": "APP-001",
+  "age": 28,
+  "annual_income": 32000,
+  "documents_complete": true,
+  "risk_score": 25,
+  "employment_type": "salaried"
+}

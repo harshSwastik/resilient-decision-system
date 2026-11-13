@@ -1,0 +1,22 @@
+{
+  "workflow_id": "vendor_approval",
+  "version": "1.0",
+  "description": "Second use case on the same engine, configured without code changes.",
+  "request_schema": {
+    "required": ["vendor_id", "annual_contract_value", "tax_verified", "sanctions_hit"],
+    "allow_extra": false,
+    "fields": {
+      "vendor_id": {"type": "string", "min_length": 1},
+      "annual_contract_value": {"type": "number", "minimum": 0},
+      "tax_verified": {"type": "boolean"},
+      "sanctions_hit": {"type": "boolean"}
+    }
+  },
+  "external_check": {"name": "simulated_vendor_registry", "max_attempts": 2},
+  "rules": [
+    {"id": "sanctions", "when": {"field": "sanctions_hit", "op": "eq", "value": true}, "outcome": "REJECTED", "reason": "Vendor has a sanctions match"},
+    {"id": "tax_missing", "when": {"field": "tax_verified", "op": "eq", "value": false}, "outcome": "MANUAL_REVIEW", "reason": "Tax registration requires manual verification"},
+    {"id": "large_contract", "when": {"field": "annual_contract_value", "op": "gt", "value": 100000}, "outcome": "MANUAL_REVIEW", "reason": "Large contract requires human approval"}
+  ],
+  "default_outcome": "APPROVED"
+}

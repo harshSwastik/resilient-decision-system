@@ -1,0 +1,54 @@
+{
+  "workflow_id": "application_approval",
+  "version": "1.0",
+  "description": "Illustrative application approval policy; values are demonstration assumptions.",
+  "request_schema": {
+    "required": ["applicant_id", "age", "annual_income", "documents_complete", "risk_score", "employment_type"],
+    "allow_extra": false,
+    "fields": {
+      "applicant_id": {"type": "string", "min_length": 1},
+      "age": {"type": "integer", "minimum": 0},
+      "annual_income": {"type": "number", "minimum": 0},
+      "documents_complete": {"type": "boolean"},
+      "risk_score": {"type": "integer", "minimum": 0},
+      "employment_type": {"type": "string"}
+    }
+  },
+  "external_check": {"name": "simulated_identity_verification", "max_attempts": 3},
+  "rules": [
+    {
+      "id": "underage",
+      "when": {"field": "age", "op": "lt", "value": 18},
+      "outcome": "REJECTED",
+      "reason": "Applicant is below the minimum age"
+    },
+    {
+      "id": "high_risk",
+      "when": {"field": "risk_score", "op": "gte", "value": 80},
+      "outcome": "REJECTED",
+      "reason": "Risk score exceeds the allowed threshold"
+    },
+    {
+      "id": "missing_documents",
+      "when": {"field": "documents_complete", "op": "eq", "value": false},
+      "outcome": "MANUAL_REVIEW",
+      "reason": "Documents need human verification"
+    },
+    {
+      "id": "self_employed_low_income",
+      "when": {"all": [
+        {"field": "employment_type", "op": "eq", "value": "self_employed"},
+        {"field": "annual_income", "op": "lt", "value": 30000}
+      ]},
+      "outcome": "MANUAL_REVIEW",
+      "reason": "Self-employed application with income below review threshold"
+    },
+    {
+      "id": "low_income",
+      "when": {"field": "annual_income", "op": "lt", "value": 20000},
+      "outcome": "REJECTED",
+      "reason": "Income is below the minimum threshold"
+    }
+  ],
+  "default_outcome": "APPROVED"
+}
